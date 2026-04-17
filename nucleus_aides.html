@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NUCLEUS — Aides & Suivi</title>
+<style>
+:root{
+  --noir:#0a0c0e;--panel:#141920;--panel2:#1a2230;
+  --vert:#00e87a;--vert2:#007744;--vert3:rgba(0,232,122,0.12);
+  --amber:#ffaa00;--amber2:rgba(255,170,0,0.12);
+  --cyan:#00d4ff;--cyan2:rgba(0,212,255,0.12);
+  --rouge:#ff3344;--blanc:#e8edf2;--gris:#8899aa;--gris2:#1e2a38;
+  --ok:#00cc66;--warn:#ffaa00;--fail:#ff3344;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--noir);color:var(--blanc);font-family:'Courier New',monospace;min-height:100vh;}
+
+/* NAV */
+nav{background:#0d1117;border-bottom:1px solid var(--vert2);padding:0;display:flex;align-items:stretch;}
+.nav-logo{padding:10px 16px;border-right:1px solid var(--gris2);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.nav-logo svg{width:28px;height:28px;}
+.nav-logo span{font-size:13px;font-weight:bold;letter-spacing:3px;color:var(--blanc);}
+.nav-logo span em{color:var(--vert);font-style:normal;}
+.nav-tabs{display:flex;align-items:stretch;flex:1;}
+.tab-btn{background:transparent;border:none;border-right:1px solid var(--gris2);color:var(--gris);padding:0 18px;font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .15s;text-transform:uppercase;}
+.tab-btn:hover{color:var(--blanc);background:rgba(255,255,255,.04);}
+.tab-btn.active{color:var(--vert);border-bottom:2px solid var(--vert);background:var(--vert3);}
+.tab-btn.prof.active{color:var(--amber);border-bottom-color:var(--amber);background:var(--amber2);}
+
+/* PAGES */
+.page{display:none;padding:20px;max-width:900px;margin:0 auto;}
+.page.active{display:block;}
+
+/* ÉCRAN ÉQUIPE */
+.team-screen{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+.team-title{font-size:22px;font-weight:bold;letter-spacing:4px;text-align:center;}
+.team-title em{color:var(--vert);font-style:normal;}
+.team-sub{font-size:10px;letter-spacing:3px;color:var(--gris);text-align:center;}
+.team-input-wrap{display:flex;gap:8px;width:100%;max-width:360px;}
+input.team-inp{flex:1;background:var(--panel2);border:1px solid var(--gris2);color:var(--blanc);padding:10px 14px;font-family:'Courier New',monospace;font-size:14px;letter-spacing:2px;text-transform:uppercase;outline:none;transition:border .2s;}
+input.team-inp:focus{border-color:var(--vert);}
+button.go-btn{background:var(--vert2);border:none;color:white;padding:10px 18px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;transition:background .15s;}
+button.go-btn:hover{background:var(--vert);}
+
+/* SCORE BADGE */
+.score-badge{position:fixed;top:48px;right:16px;background:var(--panel2);border:1px solid var(--gris2);padding:8px 14px;z-index:100;text-align:center;display:none;}
+.score-badge.show{display:block;}
+.score-badge .lbl{font-size:8px;letter-spacing:2px;color:var(--gris);}
+.score-badge .val{font-size:22px;font-weight:bold;color:var(--vert);letter-spacing:1px;}
+.score-badge .team{font-size:9px;color:var(--amber);letter-spacing:1px;margin-top:2px;}
+
+/* PHASES */
+.phase-section{margin-bottom:24px;}
+.phase-hdr{display:flex;align-items:stretch;border:1px solid;margin-bottom:12px;overflow:hidden;}
+.phase-hdr.p1{border-color:var(--vert2);}
+.phase-hdr.p2{border-color:rgba(255,170,0,.3);}
+.phase-hdr.p3{border-color:rgba(0,212,255,.3);}
+.phase-num{padding:8px 14px;font-size:18px;font-weight:bold;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:48px;}
+.phase-num.p1{background:var(--vert2);color:white;}
+.phase-num.p2{background:#5c3d00;color:white;}
+.phase-num.p3{background:#00264d;color:white;}
+.phase-num small{font-size:6px;letter-spacing:2px;opacity:.7;margin-bottom:1px;}
+.phase-inf{padding:8px 14px;flex:1;}
+.phase-inf .tag{font-size:8px;letter-spacing:2px;}
+.phase-inf.p1 .tag{color:var(--vert);}
+.phase-inf.p2 .tag{color:var(--amber);}
+.phase-inf.p3 .tag{color:var(--cyan);}
+.phase-inf .nom{font-size:13px;font-weight:bold;margin-top:2px;}
+.phase-inf .desc{font-size:10px;color:var(--gris);margin-top:1px;}
+
+/* QUESTION CARD */
+.q-card{background:var(--panel);border:1px solid var(--gris2);margin-bottom:8px;overflow:hidden;}
+.q-card.p2{border-left:3px solid rgba(255,170,0,.4);}
+.q-card.p3{border-left:3px solid rgba(0,212,255,.3);}
+.q-card:not(.p2):not(.p3){border-left:3px solid var(--vert2);}
+.q-head{padding:10px 14px;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--gris2);cursor:pointer;transition:background .15s;}
+.q-head:hover{background:rgba(255,255,255,.03);}
+.q-num{font-size:9px;font-weight:bold;flex-shrink:0;}
+.p1 .q-num,.q-card:not(.p2):not(.p3) .q-num{color:var(--vert);}
+.p2 .q-num,.q-card.p2 .q-num{color:var(--amber);}
+.p3 .q-num,.q-card.p3 .q-num{color:var(--cyan);}
+.q-txt{font-size:12px;color:rgba(232,237,242,.85);line-height:1.4;font-family:Georgia,serif;flex:1;}
+.q-hint-used{font-size:9px;color:var(--rouge);margin-left:auto;flex-shrink:0;letter-spacing:1px;}
+.q-body{display:none;padding:12px 14px;background:rgba(0,0,0,.2);}
+.q-body.open{display:block;}
+
+/* INDICES */
+.hints-area{margin-top:8px;}
+.hint-btn{background:transparent;border:1px solid var(--gris2);color:var(--gris);padding:6px 12px;font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;margin-right:6px;margin-bottom:6px;transition:all .15s;text-transform:uppercase;}
+.hint-btn:hover:not(:disabled){border-color:var(--amber);color:var(--amber);}
+.hint-btn:disabled{opacity:.35;cursor:not-allowed;}
+.hint-box{background:var(--panel2);border-left:3px solid var(--amber);padding:10px 14px;margin-bottom:8px;font-size:12px;color:rgba(232,237,242,.8);line-height:1.6;font-family:Georgia,serif;display:none;}
+.hint-box.show{display:block;}
+.hint-box .hlbl{font-family:'Courier New',monospace;font-size:8px;color:var(--amber);letter-spacing:2px;margin-bottom:5px;display:block;}
+.hint-box.corr{border-left-color:var(--ok);background:rgba(0,204,102,.06);}
+.hint-box.corr .hlbl{color:var(--ok);}
+.hint-box .nk{font-family:'Courier New',monospace;font-size:11px;font-weight:bold;}
+.hint-cost{font-size:9px;color:var(--gris);font-family:'Courier New',monospace;margin-top:6px;padding-top:6px;border-top:1px solid var(--gris2);}
+
+/* TABLEAU DE BORD */
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.dash-title{font-size:11px;letter-spacing:3px;color:var(--amber);}
+.dash-refresh{background:transparent;border:1px solid var(--gris2);color:var(--gris);padding:5px 12px;font-family:'Courier New',monospace;font-size:9px;cursor:pointer;letter-spacing:2px;transition:all .15s;}
+.dash-refresh:hover{border-color:var(--amber);color:var(--amber);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px;animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+table.dash{width:100%;border-collapse:collapse;font-size:11px;}
+table.dash th{background:var(--panel2);color:var(--amber);padding:6px 10px;text-align:left;font-size:8px;letter-spacing:2px;border-bottom:1px solid rgba(255,170,0,.3);}
+table.dash td{padding:7px 10px;border-bottom:1px solid var(--gris2);color:rgba(232,237,242,.8);vertical-align:middle;}
+table.dash tr:last-child td{border-bottom:none;}
+table.dash tr:hover td{background:rgba(255,255,255,.03);}
+.score-pill{display:inline-block;padding:3px 8px;font-size:10px;font-weight:bold;border:1px solid;}
+.sp-high{color:var(--ok);border-color:var(--ok);background:rgba(0,204,102,.1);}
+.sp-mid{color:var(--amber);border-color:var(--amber);background:rgba(255,170,0,.1);}
+.sp-low{color:var(--rouge);border-color:var(--rouge);background:rgba(255,51,68,.1);}
+.hints-mini{font-size:9px;color:var(--gris);letter-spacing:1px;}
+.dash-empty{padding:30px;text-align:center;color:var(--gris);font-size:11px;letter-spacing:2px;}
+
+/* MOT DE PASSE PROF */
+.lock-screen{text-align:center;padding:60px 20px;}
+.lock-title{font-size:12px;letter-spacing:3px;color:var(--amber);margin-bottom:16px;}
+.lock-row{display:flex;gap:8px;justify-content:center;max-width:320px;margin:0 auto;}
+input.lock-inp{flex:1;background:var(--panel2);border:1px solid rgba(255,170,0,.3);color:var(--blanc);padding:8px 12px;font-family:'Courier New',monospace;font-size:13px;text-align:center;letter-spacing:3px;outline:none;}
+input.lock-inp:focus{border-color:var(--amber);}
+button.lock-btn{background:rgba(255,170,0,.15);border:1px solid rgba(255,170,0,.4);color:var(--amber);padding:8px 14px;font-family:'Courier New',monospace;font-size:10px;cursor:pointer;letter-spacing:2px;}
+.lock-err{font-size:10px;color:var(--rouge);margin-top:8px;letter-spacing:1px;}
+
+/* RESET */
+.reset-btn{background:transparent;border:1px solid rgba(255,51,68,.3);color:rgba(255,51,68,.6);padding:5px 10px;font-family:'Courier New',monospace;font-size:9px;cursor:pointer;letter-spacing:1px;margin-left:8px;}
+.reset-btn:hover{border-color:var(--rouge);color:var(--rouge);}
+
+/* GUIDE */
+.guide-step{background:var(--panel);border:1px solid var(--gris2);border-left:3px solid var(--vert2);padding:12px 16px;margin-bottom:10px;}
+.guide-step .sn{font-size:10px;letter-spacing:2px;color:var(--vert);margin-bottom:4px;}
+.guide-step p{font-size:12px;color:rgba(232,237,242,.8);line-height:1.6;font-family:Georgia,serif;}
+.guide-step code{font-family:'Courier New',monospace;color:var(--cyan);font-size:11px;background:rgba(0,212,255,.08);padding:2px 5px;}
+.guide-step a{color:var(--cyan);}
+.warn-box{background:rgba(255,170,0,.06);border:1px solid rgba(255,170,0,.3);padding:10px 14px;font-size:11px;color:rgba(232,237,242,.75);line-height:1.6;margin-bottom:12px;font-family:Georgia,serif;}
+
+footer{border-top:1px solid var(--gris2);padding:10px 20px;text-align:center;font-size:9px;color:var(--gris2);letter-spacing:2px;margin-top:20px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 44 44" fill="none">
+      <circle cx="22" cy="22" r="4" fill="#00e87a"/>
+      <line x1="22" y1="22" x2="8"  y2="10" stroke="#00e87a" stroke-width="2"/>
+      <line x1="22" y1="22" x2="36" y2="10" stroke="#00e87a" stroke-width="2"/>
+      <line x1="22" y1="22" x2="22" y2="40" stroke="#00e87a" stroke-width="2"/>
+      <circle cx="8"  cy="10" r="5" fill="none" stroke="#00e87a" stroke-width="1.5"/>
+      <circle cx="36" cy="10" r="5" fill="none" stroke="#00e87a" stroke-width="1.5"/>
+      <circle cx="22" cy="40" r="5" fill="none" stroke="#00e87a" stroke-width="1.5"/>
+    </svg>
+    <span>OPÉRATION <em>NUCLEUS</em></span>
+  </div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showTab('aides')">▸ Aides</button>
+    <button class="tab-btn prof" onclick="showTab('dashboard')">▸ Tableau de bord</button>
+  </div>
+</nav>
+
+<!-- SCORE BADGE -->
+<div class="score-badge" id="score-badge">
+  <div class="lbl">SCORE ÉQUIPE</div>
+  <div class="val" id="badge-val">100%</div>
+  <div class="team" id="badge-team"></div>
+</div>
+
+<!-- ══════ PAGE AIDES ══════ -->
+<div class="page active" id="page-aides">
+
+  <!-- Écran saisie équipe -->
+  <div class="team-screen" id="team-screen">
+    <div class="team-sub">// SYSTÈME D'AIDE — AISN //</div>
+    <div class="team-title">OPÉRATION <em>NUCLEUS</em></div>
+    <p style="font-size:11px;color:var(--gris);text-align:center;max-width:360px;line-height:1.7;">
+      Saisissez le nom de votre équipe pour accéder aux indices.<br>
+      Chaque indice débloqué réduit votre score de <strong style="color:var(--amber);">5 points</strong>.
+    </p>
+    <div class="team-input-wrap">
+      <input type="text" class="team-inp" id="team-input" placeholder="NOM D'ÉQUIPE" maxlength="20" oninput="this.value=this.value.toUpperCase()">
+      <button class="go-btn" onclick="startSession()">ENTRER</button>
+    </div>
+    <p id="team-err" style="font-size:10px;color:var(--rouge);letter-spacing:1px;height:14px;"></p>
+  </div>
+
+  <!-- Contenu des aides -->
+  <div id="aides-content" style="display:none;">
+
+    <!-- PHASE 1 -->
+    <div class="phase-section">
+      <div class="phase-hdr p1">
+        <div class="phase-num p1"><small>PHASE</small>01</div>
+        <div class="phase-inf p1">
+          <div class="tag">// LA RADIOACTIVITÉ //</div>
+          <div class="nom">Identification de la menace</div>
+          <div class="desc">Radioactivité naturelle &amp; artificielle — Rayonnements — Désintégrations</div>
+        </div>
+      </div>
+
+      <div class="q-card" onclick="toggleQ(this)">
+        <div class="q-head">
+          <span class="q-num">Q4</span>
+          <span class="q-txt">Compléter la table des désintégrations</span>
+          <span class="q-hint-used" id="used-Q4"></span>
+        </div>
+        <div class="q-body" id="body-Q4">
+          <div class="hints-area">
+            <button class="hint-btn" id="btn-Q4-1" onclick="unlockHint(event,'Q4',1)">▸ INDICE 1 (−5%)</button>
+            <button class="hint-btn" id="btn-Q4-2" onclick="unlockHint(event,'Q4',2)" disabled>▸ INDICE 2 (−5%)</button>
+            <button class="hint-btn" id="btn-Q4-3" onclick="unlockHint(event,'Q4',3)" disabled>▸ CORRECTION (−5%)</button>
+          </div>
+          <div class="hint-box" id="hint-Q4-1"><span class="hlbl">// INDICE 1 //</span>Appliquez les deux lois de conservation : la <strong>somme des A</strong> (nucléons) doit être la même des deux côtés. La <strong>somme des Z</strong> (protons) aussi. Ce que vous ne trouvez pas du côté fils, c'est la particule émise.</div>
+          <div class="hint-box" id="hint-Q4-2"><span class="hlbl">// INDICE 2 //</span>Pour <span class="nk"><sup>238</sup><sub>92</sub>U</span> → <span class="nk"><sup>234</sup><sub>90</sub>Th</span> : A manquant = 238−234 = 4, Z manquant = 92−90 = 2. Quelle particule a A=4 et Z=2 ? Cherchez dans le tableau du Doc 1-B.</div>
+          <div class="hint-box corr" id="hint-Q4-3"><span class="hlbl">// CORRECTION //</span>
+            <strong>Ligne 1</strong> : <span class="nk"><sup>30</sup><sub>15</sub>P</span> → <span class="nk"><sup>30</sup><sub>14</sub>Si</span> + <span class="nk"><sup>0</sup><sub>+1</sub>e</span> → rayonnement <strong>β⁺</strong> (Z passe de 15 à 14, donc Z particule = +1)<br>
+            <strong>Ligne 2</strong> : <span class="nk"><sup>238</sup><sub>92</sub>U</span> → <span class="nk"><sup>234</sup><sub>90</sub>Th</span> + <span class="nk"><sup>4</sup><sub>2</sub>He</span> → rayonnement <strong>α</strong><br>
+            <strong>Ligne 3</strong> : <span class="nk"><sup>234</sup><sub>90</sub>Th</span> → <span class="nk"><sup>234</sup><sub>91</sub>Pa</span> + <span class="nk"><sup>0</sup><sub>−1</sub>e</span> → rayonnement <strong>β⁻</strong> (Z passe de 90 à 91, particule à Z=−1)</div>
+          <div class="hint-cost">Chaque indice coûte 5 points à votre équipe.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-section">
+      <div class="phase-hdr p2">
+        <div class="phase-num p2"><small>PHASE</small>02</div>
+        <div class="phase-inf p2">
+          <div class="tag">// DATATION ET RADIOACTIVITÉ //</div>
+          <div class="nom">Reconstitution chronologique</div>
+          <div class="desc">Activité — Demi-vie — Carbone 14 — Lascaux</div>
+        </div>
+      </div>
+
+      <div class="q-card p2" onclick="toggleQ(this)">
+        <div class="q-head">
+          <span class="q-num">Q6</span>
+          <span class="q-txt">Lire graphiquement A₀ et t½ — estimer la durée</span>
+          <span class="q-hint-used" id="used-Q6"></span>
+        </div>
+        <div class="q-body" id="body-Q6">
+          <div class="hints-area">
+            <button class="hint-btn" id="btn-Q6-1" onclick="unlockHint(event,'Q6',1)">▸ INDICE 1 (−5%)</button>
+            <button class="hint-btn" id="btn-Q6-2" onclick="unlockHint(event,'Q6',2)" disabled>▸ INDICE 2 (−5%)</button>
+            <button class="hint-btn" id="btn-Q6-3" onclick="unlockHint(event,'Q6',3)" disabled>▸ CORRECTION (−5%)</button>
+          </div>
+          <div class="hint-box" id="hint-Q6-1"><span class="hlbl">// INDICE 1 — PARTIE a) //</span>A₀ est l'activité à t = 0, c'est-à-dire au moment de la mort de l'animal. Sur le graphique, repérez la valeur de départ de la courbe (quand le temps vaut zéro).</div>
+          <div class="hint-box" id="hint-Q6-2"><span class="hlbl">// INDICE 2 — PARTIE b) //</span>Pour trouver t½ : calculez d'abord A₀/2. Tracez une horizontale à cette valeur jusqu'à la courbe, puis descendez verticalement sur l'axe du temps : vous lisez t½. <br>Pour la partie c) : l'activité mesurée en 1940 est 2,9 × 10⁻³ Bq. Procédez de même : trouvez ce point sur la courbe et lisez le temps correspondant.</div>
+          <div class="hint-box corr" id="hint-Q6-3"><span class="hlbl">// CORRECTION //</span>
+            <strong>a)</strong> En t=0 sur le graphique, A₀ = <strong>0,025 Bq</strong><br>
+            <strong>b)</strong> A₀/2 = 0,0125 Bq → lecture graphique → <strong>t½ ≈ 5 730 ans</strong> (environ 5 à 6 milliers d'années)<br>
+            <strong>c)</strong> Pour A = 2,9 × 10⁻³ Bq, on lit t ≈ <strong>17 000 ans</strong>. Cette durée représente environ 3 × t½ (3 × 5730 ≈ 17 190 ans), ce qui confirme la cohérence. La datation est bien adaptée car l'âge est du même ordre de grandeur que t½.</div>
+          <div class="hint-cost">Chaque indice coûte 5 points à votre équipe.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase-section">
+      <div class="phase-hdr p3">
+        <div class="phase-num p3"><small>PHASE</small>03</div>
+        <div class="phase-inf p3">
+          <div class="tag">// L'ÉNERGIE NUCLÉAIRE //</div>
+          <div class="nom">Évaluation de la source d'énergie</div>
+          <div class="desc">Défaut de masse — E = mc² — Fission de l'uranium 235</div>
+        </div>
+      </div>
+
+      <div class="q-card p3" onclick="toggleQ(this)">
+        <div class="q-head">
+          <span class="q-num">Q10</span>
+          <span class="q-txt">Calculer l'énergie libérée par la fission de l'uranium 235</span>
+          <span class="q-hint-used" id="used-Q10"></span>
+        </div>
+        <div class="q-body" id="body-Q10">
+          <div class="hints-area">
+            <button class="hint-btn" id="btn-Q10-1" onclick="unlockHint(event,'Q10',1)">▸ INDICE 1 (−5%)</button>
+            <button class="hint-btn" id="btn-Q10-2" onclick="unlockHint(event,'Q10',2)" disabled>▸ INDICE 2 (−5%)</button>
+            <button class="hint-btn" id="btn-Q10-3" onclick="unlockHint(event,'Q10',3)" disabled>▸ CORRECTION (−5%)</button>
+          </div>
+          <div class="hint-box" id="hint-Q10-1"><span class="hlbl">// INDICE 1 — DÉFAUT DE MASSE //</span>Le défaut de masse |Δm| = masse des réactifs − masse des produits. Listez tous les noyaux à gauche et à droite de la flèche. Calculez la somme des masses de chaque côté, puis faites la différence. Attention aux coefficients (il y a 2 neutrons à droite !).</div>
+          <div class="hint-box" id="hint-Q10-2"><span class="hlbl">// INDICE 2 — ÉNERGIE ET CONVERSION //</span>
+            Réactifs : m(n) + m(U235) = 1,00866 + 235,044 = 236,053 u<br>
+            Produits : m(Sr94) + m(Xe140) + 2×m(n) = 93,9154 + 139,925 + 2×1,00866 = 235,857 u<br>
+            |Δm| = 236,053 − 235,857 = 0,196 u → convertir en kg puis utiliser E = |Δm| × c²<br>
+            Pour la partie d) : nombre de noyaux dans 1 g = N<sub>A</sub> / M = 6,022×10²³ / 235</div>
+          <div class="hint-box corr" id="hint-Q10-3"><span class="hlbl">// CORRECTION COMPLÈTE //</span>
+            <strong>a)</strong> |Δm| = 0,196 u = 0,196 × 1,66054×10⁻²⁷ = <strong>3,25 × 10⁻²⁸ kg</strong><br>
+            <strong>b)</strong> E = 3,25×10⁻²⁸ × (3×10⁸)² = 2,93×10⁻¹¹ J = 2,93×10⁻¹¹/1,6×10⁻¹⁹ eV = <strong>183 MeV</strong><br>
+            <strong>c)</strong> 236 nucléons → E/nucléon = 183/236 ≈ <strong>0,78 MeV/nucléon</strong><br>
+            <strong>d)</strong> N = 6,022×10²³/235 = 2,56×10²¹ noyaux dans 1 g<br>
+            E<sub>tot</sub> = 2,56×10²¹ × 2,93×10⁻¹¹ = 7,50×10¹⁰ J = <strong>20 800 kWh ≈ 1,79 tep</strong><br>
+            → 1 g d'U235 équivaut à ~1,8 tonne de pétrole : densité énergétique exceptionnelle !</div>
+          <div class="hint-cost">Chaque indice coûte 5 points à votre équipe.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /aides-content -->
+</div>
+
+<!-- ══════ PAGE DASHBOARD ══════ -->
+<div class="page" id="page-dashboard">
+  <div id="dash-lock">
+    <div class="lock-screen">
+      <div class="lock-title">⚠ ACCÈS ENSEIGNANT — MOT DE PASSE REQUIS</div>
+      <div class="lock-row">
+        <input type="password" class="lock-inp" id="prof-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')unlockDash()">
+        <button class="lock-btn" onclick="unlockDash()">ENTRER</button>
+      </div>
+      <div class="lock-err" id="lock-err"></div>
+    </div>
+  </div>
+  <div id="dash-content" style="display:none;">
+    <div class="dash-header">
+      <span class="dash-title"><span class="live-dot"></span>TABLEAU DE BORD — SUIVI EN TEMPS RÉEL</span>
+      <div>
+        <button class="dash-refresh" onclick="loadDashboard()">↻ ACTUALISER</button>
+        <button class="reset-btn" onclick="resetAll()">✕ RÉINITIALISER</button>
+      </div>
+    </div>
+    <div class="warn-box">Les données sont stockées localement dans ce navigateur (même poste). Rafraîchissement automatique toutes les 15 secondes.</div>
+    <div id="dash-table-wrap">
+      <div class="dash-empty">Aucune équipe connectée pour l'instant.</div>
+    </div>
+  </div>
+</div>
+
+<footer>TSTI2D — RADIOACTIVITÉ — OPÉRATION NUCLEUS — D'APRÈS LE MANUEL NATHAN</footer>
+
+<script>
+// ── STOCKAGE LOCAL ──
+const PROF_PWD = 'AISN2024';
+let teamName = '';
+let teamData = {};
+
+function loadTeams(){
+  try{ return JSON.parse(localStorage.getItem('nucleus_teams')||'{}'); }
+  catch(e){ return {}; }
+}
+function saveTeams(d){ localStorage.setItem('nucleus_teams', JSON.stringify(d)); }
+
+// ── NAVIGATION ──
+function showTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='dashboard') loadDashboard();
+}
+
+// ── SESSION ÉQUIPE ──
+function startSession(){
+  const v = document.getElementById('team-input').value.trim();
+  if(!v){ document.getElementById('team-err').textContent='Veuillez saisir un nom.'; return; }
+  teamName = v;
+  const teams = loadTeams();
+  if(!teams[teamName]){
+    teams[teamName] = { score:100, hints:{}, ts: new Date().toISOString() };
+    saveTeams(teams);
+  }
+  teamData = teams[teamName];
+  document.getElementById('team-screen').style.display='none';
+  document.getElementById('aides-content').style.display='block';
+  const badge = document.getElementById('score-badge');
+  badge.classList.add('show');
+  document.getElementById('badge-team').textContent = teamName;
+  updateBadge();
+  restoreHints();
+}
+
+function updateBadge(){
+  const teams = loadTeams();
+  if(teams[teamName]){
+    document.getElementById('badge-val').textContent = teams[teamName].score + '%';
+  }
+}
+
+function restoreHints(){
+  const teams = loadTeams();
+  const td = teams[teamName] || {};
+  const hints = td.hints || {};
+  for(const [qid, level] of Object.entries(hints)){
+    for(let i=1;i<=level;i++){
+      const box = document.getElementById('hint-'+qid+'-'+i);
+      if(box) box.classList.add('show');
+      const btn = document.getElementById('btn-'+qid+'-'+i);
+      if(btn) btn.disabled = true;
+      if(i<3){
+        const nxt = document.getElementById('btn-'+qid+'-'+(i+1));
+        if(nxt) nxt.disabled = false;
+      }
+    }
+    updateUsedLabel(qid, level);
+  }
+}
+
+// ── TOGGLE QUESTION ──
+function toggleQ(card){
+  if(event.target.tagName==='BUTTON') return;
+  const body = card.querySelector('.q-body');
+  body.classList.toggle('open');
+}
+
+// ── DÉBLOQUER INDICE ──
+function unlockHint(e, qid, level){
+  e.stopPropagation();
+  if(!teamName){ alert('Saisissez d\'abord votre nom d\'équipe.'); return; }
+  const teams = loadTeams();
+  const td = teams[teamName];
+  const prev = (td.hints[qid]||0);
+  if(level <= prev) return;
+  // déduire 5 points
+  td.score = Math.max(0, td.score - 5);
+  td.hints[qid] = level;
+  teams[teamName] = td;
+  saveTeams(teams);
+  teamData = td;
+  // afficher la boîte
+  const box = document.getElementById('hint-'+qid+'-'+level);
+  if(box) box.classList.add('show');
+  // désactiver ce bouton, activer le suivant
+  const btn = document.getElementById('btn-'+qid+'-'+level);
+  if(btn) btn.disabled = true;
+  if(level < 3){
+    const nxt = document.getElementById('btn-'+qid+'-'+(level+1));
+    if(nxt) nxt.disabled = false;
+  }
+  updateUsedLabel(qid, level);
+  updateBadge();
+}
+
+function updateUsedLabel(qid, level){
+  const el = document.getElementById('used-'+qid);
+  if(el && level>0){
+    el.textContent = level + ' indice'+(level>1?'s':'')+' (−'+(level*5)+'%)';
+  }
+}
+
+// ── TABLEAU DE BORD ──
+function unlockDash(){
+  const v = document.getElementById('prof-pwd').value;
+  if(v === PROF_PWD){
+    document.getElementById('dash-lock').style.display='none';
+    document.getElementById('dash-content').style.display='block';
+    loadDashboard();
+  } else {
+    document.getElementById('lock-err').textContent = '✗ Mot de passe incorrect.';
+  }
+}
+
+function loadDashboard(){
+  const teams = loadTeams();
+  const wrap = document.getElementById('dash-table-wrap');
+  const entries = Object.entries(teams);
+  if(!entries.length){
+    wrap.innerHTML='<div class="dash-empty">Aucune équipe connectée pour l\'instant.</div>';
+    return;
+  }
+  // trier par score décroissant
+  entries.sort((a,b)=>b[1].score - a[1].score);
+  const qids = ['Q4','Q6','Q10'];
+  let html = `<table class="dash">
+    <thead><tr>
+      <th>#</th><th>ÉQUIPE</th><th>SCORE</th>
+      ${qids.map(q=>`<th>${q}</th>`).join('')}
+      <th>TOTAL INDICES</th><th>CONNEXION</th>
+    </tr></thead><tbody>`;
+  entries.forEach(([name,d],i)=>{
+    const sc = d.score;
+    const cls = sc>=80?'sp-high':sc>=50?'sp-mid':'sp-low';
+    const total = Object.values(d.hints||{}).reduce((s,v)=>s+v,0);
+    const hintsDetail = qids.map(q=>{
+      const n = (d.hints||{})[q]||0;
+      return `<td><span class="hints-mini">${n>0?n+' ▸':'—'}</span></td>`;
+    }).join('');
+    const ts = d.ts ? new Date(d.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '—';
+    html += `<tr>
+      <td style="color:var(--gris);font-size:10px;">${i+1}</td>
+      <td style="font-weight:bold;letter-spacing:1px;">${name}</td>
+      <td><span class="score-pill ${cls}">${sc}%</span></td>
+      ${hintsDetail}
+      <td style="color:var(--warn);font-size:11px;">${total}</td>
+      <td style="font-size:10px;color:var(--gris);">${ts}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function resetAll(){
+  if(confirm('Réinitialiser toutes les données équipes ?')){
+    localStorage.removeItem('nucleus_teams');
+    loadDashboard();
+  }
+}
+
+// Auto-refresh dashboard toutes les 15s si visible
+setInterval(()=>{
+  if(document.getElementById('page-dashboard').classList.contains('active') &&
+     document.getElementById('dash-content').style.display!=='none'){
+    loadDashboard();
+  }
+}, 15000);
+</script>
+</body>
+</html>
